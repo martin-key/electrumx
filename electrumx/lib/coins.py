@@ -209,4 +209,23 @@ class BitcoinSVRegtest(BitcoinSVTestnet):
     GENESIS_ACTIVATION = 10_000
 
 
-Bitcoin = BitcoinSV
+class BitcoinGold(Coin):
+    NAME = "BitcoinGold"
+    SHORTNAME = "c"
+    NET = "mainnet"
+    CHAIN_SIZE = 50_000_000_000  # Approximate chain size as of 2024
+    CHAIN_SIZE_HEIGHT = 800_000  # Approximate height as of 2024
+    AVG_BLOCK_SIZE = 62_500  # Conservative estimate
+    P2PKH_VERBYTE = bytes.fromhex("26")  # BTG P2PKH addresses start with 'G'
+    P2SH_VERBYTES = [bytes.fromhex("17")]  # BTG P2SH addresses start with 'A'
+    RPC_PORT = 8332
+    GENESIS_HASH = ('000000000019d6689c085ae165831e93'  # BTG shares BTC's genesis block
+                    '4ff763ae46a2a6c172b3f1b60a8ce26f')
+    GENESIS_ACTIVATION = 491_407  # BTG fork height from Bitcoin
+    PEERS = [
+        'electrum.bitcoingold.org s t',
+        'btg.dragon.zone s t',
+    ]
+
+
+Bitcoin = BitcoinGold

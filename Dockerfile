@@ -3,18 +3,37 @@
 
 FROM ubuntu:18.04
 
-WORKDIR /
-ADD https://github.com/kyuupichan/electrumx/archive/1.13.0.tar.gz /
-RUN tar zxvf *.tar.gz
+WORKDIR /electrumx
+COPY ./electrumx .
 
+# Install system dependencies
 RUN apt-get update && \
-        apt-get -y install python3.7 python3-pip librocksdb-dev libsnappy-dev libbz2-dev libz-dev liblz4-dev && \
-        pip3 install aiohttp pylru python-rocksdb
+    apt-get -y install \
+        python3.7 \
+        python3-pip \
+        python3-dev \
+        build-essential \
+        librocksdb-dev \
+        libsnappy-dev \
+        libbz2-dev \
+        libz-dev \
+        liblz4-dev \
+        pkg-config \
+        git \
+        cython3
 
-RUN cd /electrumx* && python3 setup.py install
+# Install Python dependencies in correct order
+RUN pip3 install --upgrade pip setuptools wheel && \
+    pip3 install typing_extensions && \
+    pip3 install multidict && \
+    pip3 install aiohttp && \
+    pip3 install pylru && \
+    pip3 install "python-rocksdb>=0.6.9"
+
+RUN python3 setup.py install
 
 ENV SERVICES="tcp://:50001"
-ENV COIN=BitcoinSV
+ENV COIN=BitcoinGold
 ENV DB_DIRECTORY=/db
 ENV DAEMON_URL="http://username:password@hostname:port/"
 ENV ALLOW_ROOT=true
