@@ -27,8 +27,10 @@ RUN pip3 install --upgrade pip setuptools wheel && \
     pip3 install typing_extensions && \
     pip3 install multidict && \
     pip3 install aiohttp && \
+    pip3 install aiorpcx && \
     pip3 install pylru && \
-    pip3 install "python-rocksdb>=0.6.9"
+    pip3 install "cython<3.0" && \
+    pip3 install "python-rocksdb==0.7.0"
 
 RUN python3 setup.py install
 
@@ -44,7 +46,10 @@ ENV CACHE_MB=2000
 
 VOLUME /db
 
-RUN mkdir -p "$DB_DIRECTORY" && ulimit -n 1048576
+RUN mkdir -p "$DB_DIRECTORY"
+
+# Remove ulimit command from RUN and add it to the container's security options
+# This will be set when running the container
 
 CMD ["/usr/bin/python3", "/usr/local/bin/electrumx_server"]
 
