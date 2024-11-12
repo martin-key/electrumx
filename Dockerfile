@@ -1,15 +1,14 @@
 # example of Dockerfile that builds release of electrumx-1.13.0
 # ENV variables can be overrided on the `docker run` command
 
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 WORKDIR /electrumx
-COPY ./electrumx .
+COPY . .
 
 # Install system dependencies
 RUN apt-get update && \
     apt-get -y install \
-        python3.7 \
         python3-pip \
         python3-dev \
         build-essential \
@@ -20,7 +19,8 @@ RUN apt-get update && \
         liblz4-dev \
         pkg-config \
         git \
-        cython3
+        cython3 \
+        openssl
 
 # Install Python dependencies in correct order
 RUN pip3 install --upgrade pip setuptools wheel && \
@@ -34,7 +34,17 @@ RUN pip3 install --upgrade pip setuptools wheel && \
 
 RUN python3 setup.py install
 
-ENV SERVICES="tcp://:50001"
+# Create directory for SSL certificates
+RUN mkdir -p /electrumx/ssl
+
+# Generate self-signed SSL certificate and key
+RUN openssl req -x509 -newkey rsa:4096 -keyout /electrumx/ssl/server.key -out /electrumx/ssl/server.crt -days 365 -nodes -subj "/CN=localhost"
+
+# Update services to include SSL
+ENV SERVICES="tcp://:50001,ssl://:50002"
+ENV SSL_CERTFILE=/electrumx/ssl/server.crt
+ENV SSL_KEYFILE=/electrumx/ssl/server.key
+
 ENV COIN=BitcoinGold
 ENV DB_DIRECTORY=/db
 ENV DAEMON_URL="http://username:password@hostname:port/"
